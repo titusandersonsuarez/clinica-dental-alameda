@@ -1,4 +1,5 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService, mensajeError } from '../core/api.service';
@@ -8,7 +9,7 @@ import { OdontogramaComponent } from '../shared/odontograma.component';
 
 @Component({
   selector: 'app-pacientes',
-  imports: [FormsModule, FechaCortaPipe, OdontogramaComponent],
+  imports: [FormsModule, FechaCortaPipe, OdontogramaComponent, DatePipe],
   template: `
   <div class="pac">
     <div>
@@ -56,16 +57,31 @@ import { OdontogramaComponent } from '../shared/odontograma.component';
 
         <div class="timeline" style="margin-top:1.25rem">
           @for (h of p.historia; track h.id) {
-            <div class="tl">
+            <div class="tl" [class.anulado]="h.anulado">
               <span class="num">{{ h.fecha }}</span>
               @if (h.piezaFdi) { <span class="tooth">{{ h.piezaFdi }}</span> } @else { <span></span> }
-              <div><b>{{ h.procedimiento }}</b>
+              <div>
+                <b class="proc">{{ h.procedimiento }}</b>
                 @if (h.observaciones) { <br><span class="muted">{{ h.observaciones }}</span> }
-                @if (h.odontologo) { <br><span class="muted" style="font-size:.8rem">{{ h.odontologo }}</span> }
+                <div class="meta-reg">
+                  {{ h.odontologo ?? 'Sin odontólogo' }} · escrito por {{ h.autor || 'sistema' }} el {{ h.creadoEn | date:'d MMM y, h:mm a' }}
+                </div>
+                @if (h.anulado) {
+                  <div class="anulacion">Anulado por {{ h.anuladoPor }} el {{ h.anuladoEn | date:'d MMM y, h:mm a' }}. Motivo: {{ h.motivoAnulacion }}</div>
+                } @else if (anulando() === h.id) {
+                  <form class="anular-form" (ngSubmit)="anular(h.id)">
+                    <input id="h-motivo" name="motivo" [(ngModel)]="motivo" placeholder="Motivo de la anulación (ej. se registró en el paciente equivocado)" aria-label="Motivo de la anulación">
+                    <button class="btn sm" style="background:var(--bad)" type="submit">Anular registro</button>
+                    <button class="btn ghost sm" type="button" (click)="anulando.set(null)">Cancelar</button>
+                  </form>
+                } @else {
+                  <button class="link-btn" type="button" (click)="anulando.set(h.id); motivo = ''">Anular</button>
+                }
               </div>
             </div>
           } @empty { <div class="empty">Sin registros todavía. Agrega el primer procedimiento arriba.</div> }
         </div>
+        <p class="muted" style="font-size:.8rem;margin-top:.75rem">Los registros de la historia clínica no se editan ni se borran: si hay un error, anúlalo con el motivo y agrega uno nuevo.</p>
 
         @if (p.citas.length) {
           <h3 style="margin-top:1.5rem">Citas</h3>
@@ -95,7 +111,9 @@ export class PacientesComponent {
   msgAnt = signal('');
   msgHist = signal('');
   nuevo = this.vacio();
-  piezas = computed(() => this.detalle()?.historia.map(h => h.piezaFdi) ?? []);
+  piezas = computed(() => this.detalle()?.historia.filter(h => !h.anulado).map(h => h.piezaFdi) ?? []);
+  anulando = signal<number | null>(null);
+  motivo = '';
   private timer?: ReturnType<typeof setTimeout>;
 
   constructor() {
@@ -125,6 +143,15 @@ export class PacientesComponent {
     this.api.paciente(id).subscribe({
       next: p => { this.detalle.set(p); this.antecedentes = p.antecedentes; },
       error: e => { this.detalle.set(null); this.msgHist.set(mensajeError(e)); }
+    });
+  }
+
+  anular(registroId: number) {
+    const p = this.detalle(); if (!p) return;
+    if (this.motivo.trim().length < 5) { this.msgHist.set('Escribe el motivo de la anulación (mínimo 5 caracteres).'); return; }
+    this.api.anularRegistro(p.id, registroId, this.motivo.trim()).subscribe({
+      next: r => { this.anulando.set(null); this.detalle.update(d => d && { ...d, historia: d.historia.map(h => h.id === r.id ? r : h) }); this.msgHist.set('Registro anulado.'); },
+      error: e => this.msgHist.set(mensajeError(e))
     });
   }
 

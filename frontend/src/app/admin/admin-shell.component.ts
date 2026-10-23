@@ -13,7 +13,7 @@ import { Resumen } from '../core/models';
       <div class="admin-head">
         <div><div class="eyebrow">Panel interno</div><h2>Administración</h2></div>
         <div style="display:flex;gap:.75rem;align-items:center">
-          <span class="muted" style="font-size:.9rem">{{ auth.usuario() }}</span>
+          <a class="muted" style="font-size:.9rem" routerLink="/admin/cambiar-password" title="Cambiar contraseña">{{ auth.usuario() }} · {{ rolTexto() }}</a>
           <button class="btn ghost sm" type="button" (click)="auth.logout()">Cerrar sesión</button>
         </div>
       </div>
@@ -27,7 +27,11 @@ import { Resumen } from '../core/models';
       }
       <nav class="subtabs">
         <a routerLink="citas" routerLinkActive="on">Citas</a>
-        <a routerLink="pacientes" routerLinkActive="on">Pacientes e historia clínica</a>
+        @if (auth.veHistoria()) { <a routerLink="pacientes" routerLinkActive="on">Pacientes e historia clínica</a> }
+        @if (auth.esAdmin()) {
+          <a routerLink="usuarios" routerLinkActive="on">Usuarios</a>
+          <a routerLink="auditoria" routerLinkActive="on">Auditoría</a>
+        }
       </nav>
       <router-outlet (activate)="cargarResumen()" />
     </div>
@@ -37,6 +41,7 @@ export class AdminShellComponent {
   private api = inject(ApiService);
   auth = inject(AuthService);
   resumen = signal<Resumen | null>(null);
+  rolTexto = () => ({ Admin: 'Administrador', Recepcion: 'Recepción', Odontologo: 'Odontólogo' } as const)[this.auth.rol() ?? 'Recepcion'];
 
   cargarResumen() { this.api.resumen().subscribe({ next: r => this.resumen.set(r), error: () => {} }); }
 }

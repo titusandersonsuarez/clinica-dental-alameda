@@ -2,6 +2,7 @@ import { Component, OnDestroy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService, mensajeError } from '../core/api.service';
+import { AuthService } from '../core/auth';
 import { FechaCortaPipe, isoFecha } from '../core/format';
 import { CitaAdmin, EstadoCita, Odontologo } from '../core/models';
 
@@ -59,7 +60,7 @@ import { CitaAdmin, EstadoCita, Odontologo } from '../core/models';
               @if (c.aceptaWhatsApp && c.whatsApp === 'Fallida' && (c.estado === 'Confirmada' || c.estado === 'Cancelada')) {
                 <button class="btn ghost sm" (click)="reenviar(c)" [disabled]="ocupado() === c.id">Reenviar WhatsApp</button>
               }
-              <button class="btn ghost sm" (click)="historia(c)">Historia</button>
+              @if (auth.veHistoria()) { <button class="btn ghost sm" (click)="historia(c)">Historia</button> }
             </div></td>
           </tr>
         } @empty {
@@ -72,6 +73,7 @@ import { CitaAdmin, EstadoCita, Odontologo } from '../core/models';
 export class CitasComponent implements OnDestroy {
   private api = inject(ApiService);
   private router = inject(Router);
+  auth = inject(AuthService);
   estados: EstadoCita[] = ['Pendiente', 'Confirmada', 'Atendida', 'Cancelada'];
   f = { estado: '', odontologoId: null as number | null, desde: isoFecha(new Date()), q: '' };
   citas = signal<CitaAdmin[]>([]);

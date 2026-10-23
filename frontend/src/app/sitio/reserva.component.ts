@@ -1,5 +1,6 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { ApiService, mensajeError } from '../core/api.service';
 import { CopPipe, FechaCortaPipe, fechaCorta, proximosDias } from '../core/format';
 import { CitaPaciente, Horario, Odontologo, Servicio } from '../core/models';
@@ -8,7 +9,7 @@ type Aviso = { texto: string; tipo: '' | 'ok' | 'err' } | null;
 
 @Component({
   selector: 'app-reserva',
-  imports: [FormsModule, CopPipe, FechaCortaPipe],
+  imports: [FormsModule, CopPipe, FechaCortaPipe, RouterLink],
   template: `
   <div class="booking">
     <form class="panel" (ngSubmit)="reservar()" novalidate id="form-reserva">
@@ -61,6 +62,10 @@ type Aviso = { texto: string; tipo: '' | 'ok' | 'err' } | null;
         </div>
         <label class="f">Motivo de consulta
           <textarea id="r-motivo" name="motivo" [(ngModel)]="datos.motivo" placeholder="Ej.: sensibilidad en muela inferior derecha"></textarea>
+        </label>
+        <label class="check">
+          <input id="r-datos" name="aceptaPoliticaDatos" type="checkbox" [(ngModel)]="datos.aceptaPoliticaDatos">
+          <span>Autorizo el tratamiento de mis datos personales y de salud según la <a routerLink="/privacidad" target="_blank">política de tratamiento de datos</a>. <b>Obligatorio.</b></span>
         </label>
         <label class="check">
           <input id="r-wa" name="aceptaWhatsApp" type="checkbox" [(ngModel)]="datos.aceptaWhatsApp">
@@ -121,7 +126,7 @@ export class ReservaComponent {
   aviso = signal<Aviso>(null);
   misCitas = signal<CitaPaciente[] | null>(null);
 
-  datos = { nombre: '', cedula: '', celular: '', correo: '', motivo: '', aceptaWhatsApp: false };
+  datos = { nombre: '', cedula: '', celular: '', correo: '', motivo: '', aceptaWhatsApp: false, aceptaPoliticaDatos: false };
   consulta = { cedula: '', celular: '' };
 
   servicio = computed(() => this.servicios().find(s => s.id === this.servicioId()));
@@ -156,13 +161,15 @@ export class ReservaComponent {
     if (!this.hora()) return this.aviso.set({ texto: 'Elige una hora disponible.', tipo: 'err' });
     if (!d.nombre.trim() || !d.cedula.trim() || !d.celular.trim())
       return this.aviso.set({ texto: 'Completa nombre, cédula y celular para reservar.', tipo: 'err' });
+    if (!d.aceptaPoliticaDatos)
+      return this.aviso.set({ texto: 'Para reservar debes autorizar el tratamiento de tus datos.', tipo: 'err' });
 
     this.enviando.set(true);
     this.aviso.set(null);
     this.api.reservar({
       servicioId: this.servicioId()!, odontologoId: this.odontologoId()!, fecha: this.fecha(), hora: this.hora()!,
       nombre: d.nombre.trim(), cedula: d.cedula.trim(), celular: d.celular.trim(),
-      correo: d.correo.trim() || undefined, motivo: d.motivo.trim() || undefined, aceptaWhatsApp: d.aceptaWhatsApp
+      correo: d.correo.trim() || undefined, motivo: d.motivo.trim() || undefined, aceptaWhatsApp: d.aceptaWhatsApp, aceptaPoliticaDatos: d.aceptaPoliticaDatos
     }).subscribe({
       next: c => {
         this.enviando.set(false);

@@ -22,6 +22,54 @@ namespace DentalAlameda.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("DentalAlameda.Domain.Entities.AuditoriaClinica", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("Accion")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Detalle")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Ip")
+                        .HasMaxLength(45)
+                        .HasColumnType("character varying(45)");
+
+                    b.Property<int>("PacienteId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("UsuarioId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UsuarioNombre")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("UsuarioRol")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Fecha");
+
+                    b.HasIndex("PacienteId", "Fecha");
+
+                    b.ToTable("auditoria_clinica", (string)null);
+                });
+
             modelBuilder.Entity("DentalAlameda.Domain.Entities.Cita", b =>
                 {
                     b.Property<int>("Id")
@@ -176,6 +224,9 @@ namespace DentalAlameda.Infrastructure.Persistence.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
 
+                    b.Property<DateTime?>("AutorizaDatosEn")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Cedula")
                         .IsRequired()
                         .HasMaxLength(11)
@@ -214,11 +265,33 @@ namespace DentalAlameda.Infrastructure.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("Anulado")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("AnuladoEn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("AnuladoPorNombre")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("AutorNombre")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<int?>("AutorUsuarioId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("CreadoEn")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateOnly>("Fecha")
                         .HasColumnType("date");
+
+                    b.Property<string>("MotivoAnulacion")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
 
                     b.Property<string>("Observaciones")
                         .IsRequired()
@@ -298,6 +371,15 @@ namespace DentalAlameda.Infrastructure.Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("Activo")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("CreadoEn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("DebeCambiarPassword")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(160)
@@ -308,6 +390,9 @@ namespace DentalAlameda.Infrastructure.Persistence.Migrations
                         .HasMaxLength(120)
                         .HasColumnType("character varying(120)");
 
+                    b.Property<int?>("OdontologoId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("text");
@@ -317,10 +402,15 @@ namespace DentalAlameda.Infrastructure.Persistence.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
+                    b.Property<DateTime?>("UltimoIngresoEn")
+                        .HasColumnType("timestamp with time zone");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
                         .IsUnique();
+
+                    b.HasIndex("OdontologoId");
 
                     b.ToTable("usuarios", (string)null);
                 });
@@ -375,6 +465,16 @@ namespace DentalAlameda.Infrastructure.Persistence.Migrations
                         .HasForeignKey("PacienteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Odontologo");
+                });
+
+            modelBuilder.Entity("DentalAlameda.Domain.Entities.Usuario", b =>
+                {
+                    b.HasOne("DentalAlameda.Domain.Entities.Odontologo", "Odontologo")
+                        .WithMany()
+                        .HasForeignKey("OdontologoId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Odontologo");
                 });

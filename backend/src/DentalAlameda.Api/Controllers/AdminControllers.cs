@@ -1,10 +1,13 @@
+using DentalAlameda.Application.Abstractions;
 using DentalAlameda.Application.Dtos;
 using DentalAlameda.Application.Services;
+using DentalAlameda.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DentalAlameda.Api.Controllers;
 
+/// <summary>Agenda: la gestionan todos los roles del personal.</summary>
 [ApiController]
 [Authorize]
 [Route("api/admin/citas")]
@@ -34,8 +37,9 @@ public class CitasAdminController(CitasAdminService citas) : ControllerBase
     }
 }
 
+/// <summary>Historia clínica: solo Admin y Odontólogo. Cada lectura y cambio queda auditado.</summary>
 [ApiController]
-[Authorize]
+[Authorize(Roles = Roles.Clinicos)]
 [Route("api/admin/pacientes")]
 public class PacientesController(PacientesService pacientes) : ControllerBase
 {
@@ -56,4 +60,44 @@ public class PacientesController(PacientesService pacientes) : ControllerBase
     [HttpPost("{id:int}/historia")]
     public async Task<ActionResult<RegistroClinicoDto>> AgregarRegistro(int id, CrearRegistroRequest req, CancellationToken ct)
         => Created($"/api/admin/pacientes/{id}", await pacientes.AgregarRegistroAsync(id, req, ct));
+
+    /// <summary>Anula un registro con motivo. Los registros nunca se editan ni se borran.</summary>
+    [HttpPost("{id:int}/historia/{registroId:int}/anular")]
+    public Task<RegistroClinicoDto> Anular(int id, int registroId, AnularRegistroRequest req, CancellationToken ct)
+        => pacientes.AnularRegistroAsync(id, registroId, req.Motivo, ct);
+}
+
+[ApiController]
+[Authorize(Roles = Roles.Admin)]
+[Route("api/admin/auditoria")]
+public class AuditoriaController(AuditoriaService auditoria) : ControllerBase
+{
+    [HttpGet]
+    public Task<IReadOnlyList<AuditoriaDto>> Listar([FromQuery] int? pacienteId, [FromQuery] DateOnly? desde,
+        [FromQuery] DateOnly? hasta, [FromQuery] string? accion, CancellationToken ct)
+        => auditoria.ListarAsync(pacienteId, desde, hasta, accion, ct);
+}
+
+[ApiController]
+[Authorize(Roles = Roles.Admin)]
+[Route("api/admin/usuarios")]
+public class UsuariosController(UsuariosService usuarios) : ControllerBase
+{
+    [HttpGet]
+    public Task<IReadOnlyList<UsuarioDto>> Listar(CancellationToken ct) => usuarios.ListarAsync(ct);
+
+    /// <summary>Crea el usuario con una contraseña temporal que se muestra una sola vez.</summary>
+    [HttpPost]
+    public async Task<ActionResult<UsuarioConPasswordDto>> Crear(CrearUsuarioRequest req, CancellationToken ct)
+        => Created("/api/admin/usuarios", await usuarios.CrearAsync(req, ct));
+
+    [HttpPost("{id:int}/restablecer-password")]
+    public Task<UsuarioConPasswordDto> Restablecer(int id, CancellationToken ct) => usuarios.RestablecerPasswordAsync(id, ct);
+
+    [HttpPatch("{id:int}/activo")]
+    public async Task<IActionResult> Activo(int id, ActivoRequest req, CancellationToken ct)
+    {
+        await usuarios.CambiarActivoAsync(id, req.Activo, ct);
+        return NoContent();
+    }
 }

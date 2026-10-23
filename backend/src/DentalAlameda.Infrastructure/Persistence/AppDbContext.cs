@@ -16,6 +16,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<RegistroClinico> RegistrosClinicos => Set<RegistroClinico>();
     public DbSet<Usuario> Usuarios => Set<Usuario>();
     public DbSet<Notificacion> Notificaciones => Set<Notificacion>();
+    public DbSet<AuditoriaClinica> Auditoria => Set<AuditoriaClinica>();
 
     protected override void OnModelCreating(ModelBuilder b) =>
         b.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

@@ -7,7 +7,7 @@ export interface Disponibilidad { fecha: string; odontologoId: number; servicioI
 
 export interface CrearCita {
   servicioId: number; odontologoId: number; fecha: string; hora: string;
-  nombre: string; cedula: string; celular: string; correo?: string; motivo?: string; aceptaWhatsApp: boolean;
+  nombre: string; cedula: string; celular: string; correo?: string; motivo?: string; aceptaWhatsApp: boolean; aceptaPoliticaDatos: boolean;
 }
 export interface CitaCreada { id: number; fecha: string; hora: string; servicio: string; odontologo: string; estado: EstadoCita; }
 export interface CitaPaciente { id: number; fecha: string; hora: string; servicio: string; odontologo: string; estado: EstadoCita; }
@@ -21,14 +21,31 @@ export interface CitaAdmin {
 export interface Resumen { citasHoy: number; pendientes: number; confirmadas: number; pacientes: number; }
 
 export interface PacienteLista { id: number; nombre: string; cedula: string; celular: string; totalCitas: number; }
-export interface RegistroClinico { id: number; fecha: string; piezaFdi: string | null; procedimiento: string; observaciones: string; odontologo: string | null; }
+export interface RegistroClinico {
+  id: number; fecha: string; piezaFdi: string | null; procedimiento: string; observaciones: string; odontologo: string | null;
+  autor: string; creadoEn: string; anulado: boolean; motivoAnulacion: string | null; anuladoPor: string | null; anuladoEn: string | null;
+}
 export interface PacienteDetalle {
   id: number; nombre: string; cedula: string; celular: string; correo: string | null; antecedentes: string;
   historia: RegistroClinico[]; citas: CitaPaciente[];
 }
 export interface CrearRegistro { fecha: string; piezaFdi?: string; procedimiento: string; observaciones?: string; odontologoId?: number; }
 
-export interface LoginResponse { token: string; expiraEn: string; nombre: string; rol: string; }
+export type Rol = 'Admin' | 'Recepcion' | 'Odontologo';
+export interface LoginResponse { token: string; expiraEn: string; nombre: string; rol: Rol; debeCambiarPassword: boolean; }
+
+export interface Usuario {
+  id: number; email: string; nombre: string; rol: Rol; activo: boolean; debeCambiarPassword: boolean;
+  odontologoId: number | null; odontologo: string | null; ultimoIngresoEn: string | null;
+}
+export interface UsuarioConPassword { usuario: Usuario; passwordTemporal: string; }
+export interface CrearUsuario { email: string; nombre: string; rol: Rol; odontologoId: number | null; }
+
+export type AccionAuditoria = 'ConsultaHistoria' | 'RegistroCreado' | 'RegistroAnulado' | 'AntecedentesModificados';
+export interface Auditoria {
+  id: number; fecha: string; usuario: string; rol: string; accion: AccionAuditoria;
+  pacienteId: number; paciente: string; detalle: string; ip: string | null;
+}
 
 /** Error de la API en formato ProblemDetails. */
 export interface Problema { title?: string; status?: number; errors?: Record<string, string[]>; }

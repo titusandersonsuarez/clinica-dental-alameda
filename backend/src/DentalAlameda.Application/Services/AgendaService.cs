@@ -52,6 +52,8 @@ public class AgendaService(IAppDbContext db, IClock clock)
         if (!HorarioClinica.EsHorarioValido(req.Fecha, inicio, servicio.DuracionMinutos))
             throw new DomainException("Ese horario está fuera de la jornada de atención para este servicio.");
 
+        if (!req.AceptaPoliticaDatos)
+            throw new DomainException("Para reservar debes aceptar la política de tratamiento de datos.");
         var celular = SoloDigitos(req.Celular);
 
         return await db.EnTransaccionAsync(async () =>
@@ -63,7 +65,7 @@ public class AgendaService(IAppDbContext db, IClock clock)
             var paciente = await db.Pacientes.FirstOrDefaultAsync(p => p.Cedula == req.Cedula, ct);
             if (paciente is null)
             {
-                paciente = new Paciente { Cedula = req.Cedula, Nombre = req.Nombre.Trim(), Celular = celular, Correo = req.Correo?.Trim(), AceptaWhatsApp = req.AceptaWhatsApp };
+                paciente = new Paciente { Cedula = req.Cedula, Nombre = req.Nombre.Trim(), Celular = celular, Correo = req.Correo?.Trim(), AceptaWhatsApp = req.AceptaWhatsApp, AutorizaDatosEn = DateTime.UtcNow };
                 db.Pacientes.Add(paciente);
             }
             else
@@ -76,6 +78,7 @@ public class AgendaService(IAppDbContext db, IClock clock)
                     throw new DomainException("Ya tienes una cita a esa hora.");
                 paciente.ActualizarContacto(req.Nombre, celular, req.Correo);
                 paciente.AceptaWhatsApp = req.AceptaWhatsApp;
+                paciente.AutorizaDatosEn = DateTime.UtcNow;
             }
 
             var cita = new Cita

@@ -17,6 +17,11 @@ public class JwtOptions
     public int HorasExpiracion { get; set; } = 8;
 }
 
+public static class ClaimsPersonal
+{
+    public const string DebeCambiarPassword = "dcp";
+}
+
 public class BcryptPasswordHasher : IPasswordHasher
 {
     public string Hash(string password) => BCrypt.Net.BCrypt.HashPassword(password, workFactor: 11);
@@ -30,13 +35,16 @@ public class JwtTokenService(IOptions<JwtOptions> options) : ITokenService
         var o = options.Value;
         var exp = DateTime.UtcNow.AddHours(o.HorasExpiracion);
         var creds = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(o.Key)), SecurityAlgorithms.HmacSha256);
-        var token = new JwtSecurityToken(o.Issuer, o.Audience,
-            [
-                new Claim(JwtRegisteredClaimNames.Sub, u.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, u.Email),
-                new Claim(ClaimTypes.Name, u.Nombre),
-                new Claim(ClaimTypes.Role, u.Rol)
-            ],
+        var claims = new List<Claim>
+        {
+            new(JwtRegisteredClaimNames.Sub, u.Id.ToString()),
+            new(JwtRegisteredClaimNames.Email, u.Email),
+            new(ClaimTypes.Name, u.Nombre),
+            new(ClaimTypes.Role, u.Rol)
+        };
+        // Mientras esté presente, la API solo permite cambiar la contraseña
+        if (u.DebeCambiarPassword) claims.Add(new Claim(ClaimsPersonal.DebeCambiarPassword, "1"));
+        var token = new JwtSecurityToken(o.Issuer, o.Audience, claims,
             expires: exp, signingCredentials: creds);
         return (new JwtSecurityTokenHandler().WriteToken(token), exp);
     }

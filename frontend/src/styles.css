@@ -194,3 +194,28 @@ nav.tabs a.primary,nav.tabs a.on{background:var(--accent);color:var(--accent-ink
 .wa-state.wa-pendiente{color:var(--warn)}.wa-state.wa-pendiente::before{background:var(--warn)}
 .wa-state.wa-fallida{color:var(--bad)}.wa-state.wa-fallida::before{background:var(--bad)}
 .wa-err{font-size:.72rem;color:var(--bad);max-width:22ch;margin-top:.15rem}
+.check a{color:var(--accent)}
+.reglas{list-style:none;padding:0;margin:0;display:flex;gap:1rem;font-size:.8rem;color:var(--muted)}
+.reglas li::before{content:"○ "}.reglas li.ok{color:var(--ok)}.reglas li.ok::before{content:"● "}
+.temporal{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem;border-color:var(--warn);background:var(--warn-soft)}
+.temporal code{font-family:var(--f-mono);font-size:1.1rem;letter-spacing:.06em;user-select:all;background:var(--surface);padding:.3rem .6rem;border-radius:6px}
+.nuevo{margin-bottom:1.25rem;display:flex;flex-direction:column;gap:.75rem}
+.grid-nuevo{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem}
+tr.inactivo td{opacity:.6}
+.meta-reg{font-size:.75rem;color:var(--muted);margin-top:.25rem}
+.tl.anulado .proc,.tl.anulado .tooth{text-decoration:line-through;opacity:.6}
+.anulacion{font-size:.78rem;color:var(--bad);background:var(--bad-soft);border-radius:6px;padding:.3rem .5rem;margin-top:.35rem}
+.anular-form{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.4rem}
+.anular-form input{flex:1;min-width:220px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:.4rem .6rem}
+.link-btn{border:0;background:none;color:var(--muted);font-size:.78rem;text-decoration:underline;cursor:pointer;padding:0;margin-top:.25rem}
+.link-btn:hover{color:var(--bad)}
+.aud{font-size:.75rem;font-weight:600;padding:.15rem .5rem;border-radius:999px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.aud-RegistroAnulado{background:var(--bad-soft);color:var(--bad)}
+.aud-AntecedentesModificados{background:var(--warn-soft);color:var(--warn)}
+.aud-ConsultaHistoria{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.legal{max-width:760px;padding-block:3rem}
+.legal h1{font-size:clamp(1.8rem,4vw,2.4rem);margin-bottom:.5rem}
+.legal h2{font-size:1.25rem;margin:2rem 0 .6rem}
+.legal p,.legal li{line-height:1.7;margin-bottom:.6rem}
+.legal .pendiente{background:var(--warn-soft);color:var(--warn);padding:0 .25rem;border-radius:4px}
+footer a{color:inherit}

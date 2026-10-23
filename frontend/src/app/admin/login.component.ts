@@ -30,7 +30,7 @@ export class LoginComponent {
     if (!this.email || !this.password) { this.error.set('Escribe tu correo y contraseña.'); return; }
     this.enviando.set(true);
     this.auth.login(this.email, this.password).subscribe({
-      next: () => this.router.navigate(['/admin']),
+      next: r => this.router.navigate([r.debeCambiarPassword ? '/admin/cambiar-password' : '/admin']),
       error: e => { this.enviando.set(false); this.error.set(mensajeError(e)); }
     });
   }

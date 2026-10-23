@@ -55,7 +55,7 @@ Monolito modular en ASP.NET Core 8 con Clean Architecture (Domain, Application, 
 
 ## Consecuencias
 
-- Más fácil: probar reglas (18 pruebas sin base de datos), agregar notificaciones o nuevos estados.
+- Más fácil: probar reglas (45 pruebas sin base de datos), agregar notificaciones o nuevos estados.
 - Más difícil: el paciente no tiene portal completo (historial propio) sin agregar autenticación de pacientes.
 - A revisar: festivos, bloqueos de agenda, auditoría de accesos a historia clínica, roles diferenciados.
 
@@ -65,4 +65,6 @@ Monolito modular en ASP.NET Core 8 con Clean Architecture (Domain, Application, 
 2. [x] Frontend Angular: sitio, reserva, panel y odontograma.
 3. [x] Notificación por WhatsApp al confirmar y cancelar (Twilio, patrón outbox). Ver WHATSAPP.md.
 4. [ ] Calendario de festivos y bloqueos por odontólogo.
-5. [ ] Registro de auditoría de lecturas y cambios en historia clínica.
+5. [x] Registro de auditoría de lecturas y cambios en historia clínica; registros inmutables con anulación.
+6. [x] Roles (Admin, Recepción, Odontólogo) y cambio obligatorio de contraseña temporal.
+7. [x] Despliegue de producción con HTTPS (Caddy) y respaldos diarios verificados.

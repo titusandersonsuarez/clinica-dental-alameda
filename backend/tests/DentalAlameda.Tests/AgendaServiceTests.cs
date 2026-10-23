@@ -31,7 +31,7 @@ public class AgendaServiceTests
     private static CrearCitaRequest Req(string hora, int servicio = 1, string cedula = "1098765432", DateOnly? fecha = null) => new()
     {
         ServicioId = servicio, OdontologoId = 1, Fecha = fecha ?? Lunes, Hora = hora,
-        Nombre = "María Gómez", Cedula = cedula, Celular = "300 111 2233"
+        Nombre = "María Gómez", Cedula = cedula, Celular = "300 111 2233", AceptaPoliticaDatos = true
     };
 
     [Fact]

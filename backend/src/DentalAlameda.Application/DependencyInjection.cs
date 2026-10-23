@@ -11,5 +11,7 @@ public static class DependencyInjection
         .AddScoped<CitasAdminService>()
         .AddScoped<PacientesService>()
         .AddScoped<AuthService>()
-        .AddScoped<NotificacionesService>();
+        .AddScoped<NotificacionesService>()
+        .AddScoped<UsuariosService>()
+        .AddScoped<AuditoriaService>();
 }

@@ -12,6 +12,8 @@ public class Paciente
     public string Antecedentes { get; set; } = "";
     /// <summary>Autorización expresa para recibir avisos de citas por WhatsApp (Ley 1581 de 2012).</summary>
     public bool AceptaWhatsApp { get; set; }
+    /// <summary>Fecha en que aceptó la política de tratamiento de datos (Ley 1581). Obligatoria para reservar.</summary>
+    public DateTime? AutorizaDatosEn { get; set; }
     public DateTime CreadoEn { get; set; } = DateTime.UtcNow;
 
     public List<Cita> Citas { get; set; } = [];
@@ -24,7 +26,8 @@ public class Paciente
         if (!string.IsNullOrWhiteSpace(correo)) Correo = correo.Trim();
     }
 
-    public RegistroClinico AgregarRegistro(DateOnly fecha, string? pieza, string procedimiento, string? observaciones, int? odontologoId)
+    public RegistroClinico AgregarRegistro(DateOnly fecha, string? pieza, string procedimiento, string? observaciones, int? odontologoId,
+        int? autorId = null, string autorNombre = "")
     {
         if (string.IsNullOrWhiteSpace(procedimiento))
             throw new DomainException("El procedimiento es obligatorio.");
@@ -34,7 +37,9 @@ public class Paciente
             PiezaFdi = PiezaDental.Normalizar(pieza),
             Procedimiento = procedimiento.Trim(),
             Observaciones = observaciones?.Trim() ?? "",
-            OdontologoId = odontologoId
+            OdontologoId = odontologoId,
+            AutorUsuarioId = autorId,
+            AutorNombre = autorNombre
         };
         Historia.Add(registro);
         return registro;
@@ -53,6 +58,25 @@ public class RegistroClinico
     public int? OdontologoId { get; set; }
     public Odontologo? Odontologo { get; set; }
     public DateTime CreadoEn { get; set; } = DateTime.UtcNow;
+
+    // Quién lo escribió. La historia clínica no se edita: un error se corrige anulando y creando otro registro.
+    public int? AutorUsuarioId { get; set; }
+    public string AutorNombre { get; set; } = "";
+    public bool Anulado { get; private set; }
+    public string? MotivoAnulacion { get; private set; }
+    public string? AnuladoPorNombre { get; private set; }
+    public DateTime? AnuladoEn { get; private set; }
+
+    public void Anular(string motivo, string usuario)
+    {
+        if (Anulado) throw new DomainException("El registro ya está anulado.");
+        if (string.IsNullOrWhiteSpace(motivo) || motivo.Trim().Length < 5)
+            throw new DomainException("Escribe el motivo de la anulación (mínimo 5 caracteres).");
+        Anulado = true;
+        MotivoAnulacion = motivo.Trim();
+        AnuladoPorNombre = usuario;
+        AnuladoEn = DateTime.UtcNow;
+    }
 }
 
 /// <summary>Numeración FDI de dientes permanentes: cuadrante 1–4, pieza 1–8.</summary>

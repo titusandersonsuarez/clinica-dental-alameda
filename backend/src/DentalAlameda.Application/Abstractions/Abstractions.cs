@@ -12,6 +12,7 @@ public interface IAppDbContext
     DbSet<RegistroClinico> RegistrosClinicos { get; }
     DbSet<Usuario> Usuarios { get; }
     DbSet<Notificacion> Notificaciones { get; }
+    DbSet<AuditoriaClinica> Auditoria { get; }
     Task<int> SaveChangesAsync(CancellationToken ct = default);
     /// <summary>Ejecuta la operación en una transacción serializable (evita reservas dobles).</summary>
     Task<T> EnTransaccionAsync<T>(Func<Task<T>> operacion, CancellationToken ct = default);
@@ -54,4 +55,13 @@ public class ClinicaOptions
 {
     public string Nombre { get; set; } = "Clínica Dental Alameda";
     public string Direccion { get; set; } = "";
+}
+
+/// <summary>Usuario autenticado de la petición actual (lo implementa la API a partir del JWT).</summary>
+public interface ICurrentUser
+{
+    int? Id { get; }
+    string Nombre { get; }
+    string Rol { get; }
+    string? Ip { get; }
 }

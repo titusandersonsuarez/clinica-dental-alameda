@@ -74,6 +74,9 @@ public class RegistroClinicoConfig : IEntityTypeConfiguration<RegistroClinico>
         e.Property(x => x.Observaciones).HasMaxLength(2000);
         e.HasOne(x => x.Odontologo).WithMany().HasForeignKey(x => x.OdontologoId).OnDelete(DeleteBehavior.SetNull);
         e.HasIndex(x => new { x.PacienteId, x.Fecha });
+        e.Property(x => x.AutorNombre).HasMaxLength(120);
+        e.Property(x => x.MotivoAnulacion).HasMaxLength(300);
+        e.Property(x => x.AnuladoPorNombre).HasMaxLength(120);
     }
 }
 
@@ -86,6 +89,7 @@ public class UsuarioConfig : IEntityTypeConfiguration<Usuario>
         e.HasIndex(x => x.Email).IsUnique();
         e.Property(x => x.Nombre).HasMaxLength(120);
         e.Property(x => x.Rol).HasMaxLength(20);
+        e.HasOne(x => x.Odontologo).WithMany().HasForeignKey(x => x.OdontologoId).OnDelete(DeleteBehavior.SetNull);
     }
 }
 
@@ -102,5 +106,20 @@ public class NotificacionConfig : IEntityTypeConfiguration<Notificacion>
         e.HasOne(x => x.Cita).WithMany(c => c.Notificaciones).HasForeignKey(x => x.CitaId).OnDelete(DeleteBehavior.Cascade);
         // El worker busca pendientes por fecha de próximo intento
         e.HasIndex(x => new { x.Estado, x.ProximoIntentoEn });
+    }
+}
+
+public class AuditoriaClinicaConfig : IEntityTypeConfiguration<AuditoriaClinica>
+{
+    public void Configure(EntityTypeBuilder<AuditoriaClinica> e)
+    {
+        e.ToTable("auditoria_clinica");
+        e.Property(x => x.Accion).HasConversion<int>();
+        e.Property(x => x.UsuarioNombre).HasMaxLength(120);
+        e.Property(x => x.UsuarioRol).HasMaxLength(20);
+        e.Property(x => x.Detalle).HasMaxLength(1000);
+        e.Property(x => x.Ip).HasMaxLength(45);
+        e.HasIndex(x => new { x.PacienteId, x.Fecha });
+        e.HasIndex(x => x.Fecha);
     }
 }

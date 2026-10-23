@@ -1,0 +1,88 @@
+# Producción: HTTPS automático (Caddy + Let's Encrypt), secretos obligatorios y respaldos diarios.
+# Uso:  cp .env.production.example .env  &&  docker compose -f docker-compose.prod.yml up -d --build
+# Guía completa: docs/DEPLOY.md
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: dental_alameda
+      POSTGRES_USER: dental
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD en .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dental -d dental_alameda"]
+      interval: 5s
+      retries: 10
+    # Sin puertos publicados: la base de datos solo es accesible dentro de la red de Docker
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Default: Host=db;Port=5432;Database=dental_alameda;Username=dental;Password=${DB_PASSWORD}
+      Jwt__Key: ${JWT_KEY:?Define JWT_KEY en .env (openssl rand -base64 48)}
+      Seed__AdminEmail: ${ADMIN_EMAIL:?Define ADMIN_EMAIL en .env}
+      Seed__AdminPassword: ${ADMIN_PASSWORD_TEMPORAL:?Define ADMIN_PASSWORD_TEMPORAL en .env}
+      Swagger__Enabled: "false"
+      Cors__Origins__0: https://${DOMINIO}
+      Clinica__Nombre: ${CLINICA_NOMBRE:?Define CLINICA_NOMBRE en .env}
+      Clinica__Direccion: "${CLINICA_DIRECCION:?Define CLINICA_DIRECCION en .env}"
+      WhatsApp__Proveedor: ${WHATSAPP_PROVEEDOR:-Consola}
+      Twilio__AccountSid: ${TWILIO_ACCOUNT_SID:-}
+      Twilio__AuthToken: ${TWILIO_AUTH_TOKEN:-}
+      Twilio__From: ${TWILIO_FROM:-}
+      Twilio__PlantillaConfirmacion: ${TWILIO_PLANTILLA_CONFIRMACION:-}
+      Twilio__PlantillaCancelacion: ${TWILIO_PLANTILLA_CANCELACION:-}
+
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - api
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMINIO: ${DOMINIO:?Define DOMINIO en .env (ej. citas.tuclinica.co)}
+      CORREO_TLS: ${CORREO_TLS:?Define CORREO_TLS en .env (avisos de Let's Encrypt)}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGHOST: db
+      PGUSER: dental
+      PGPASSWORD: ${DB_PASSWORD}
+      PGDATABASE: dental_alameda
+      TZ: America/Bogota
+      HORA_BACKUP: ${HORA_BACKUP:-02}
+      RETENCION_DIAS: ${RETENCION_DIAS:-30}
+    volumes:
+      - ./backups:/backups
+      - ./scripts/backup.sh:/backup.sh:ro
+    entrypoint: ["/bin/sh", "/backup.sh"]
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

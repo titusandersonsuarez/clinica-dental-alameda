@@ -1,6 +1,11 @@
 /** Datos de contacto de la clínica. Reemplázalos por los reales. */
 export const CLINICA = {
   nombre: 'Clínica Dental Alameda',
+  // Datos legales para la política de tratamiento de datos (/privacidad)
+  razonSocial: 'Clínica Dental Alameda S.A.S.',
+  nit: '',                            // ej. 900.123.456-7
+  correoDatos: '',                    // ej. datos@tuclinica.co
+  politicaVigenteDesde: '23 de octubre de 2026',
   whatsapp: '573000000000',           // formato internacional sin "+"
   whatsappVisible: '+57 300 000 0000',
   direccion: 'Calle 00 # 00-00, consultorio 201',

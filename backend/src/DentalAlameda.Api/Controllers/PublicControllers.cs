@@ -1,5 +1,7 @@
 using DentalAlameda.Application.Dtos;
 using DentalAlameda.Application.Services;
+using DentalAlameda.Application.Abstractions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -49,4 +51,11 @@ public class AuthController(AuthService auth) : ControllerBase
     [HttpPost("login")]
     [EnableRateLimiting("login")]
     public Task<LoginResponse> Login(LoginRequest req, CancellationToken ct) => auth.LoginAsync(req, ct);
+
+    /// <summary>Cambia la contraseña del usuario actual y devuelve un token nuevo sin la marca de cambio obligatorio.</summary>
+    [HttpPost("cambiar-password")]
+    [Authorize]
+    [EnableRateLimiting("password")]
+    public Task<LoginResponse> CambiarPassword(CambiarPasswordRequest req, [FromServices] ICurrentUser usuario, CancellationToken ct)
+        => auth.CambiarPasswordAsync(usuario.Id ?? throw new UnauthorizedAccessException("Sesión no válida."), req, ct);
 }

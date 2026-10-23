@@ -29,6 +29,8 @@ public record CrearCitaRequest
     [StringLength(500)] public string? Motivo { get; init; }
     /// <summary>Autorización expresa para recibir avisos por WhatsApp.</summary>
     public bool AceptaWhatsApp { get; init; }
+    /// <summary>Aceptación de la política de tratamiento de datos (obligatoria).</summary>
+    public bool AceptaPoliticaDatos { get; init; }
 }
 
 public record CitaCreadaDto(int Id, DateOnly Fecha, string Hora, string Servicio, string Odontologo, string Estado);
@@ -51,7 +53,12 @@ public record ResumenDto(int CitasHoy, int Pendientes, int Confirmadas, int Paci
 // ---------- Admin: pacientes ----------
 public record PacienteListaDto(int Id, string Nombre, string Cedula, string Celular, int TotalCitas);
 
-public record RegistroClinicoDto(int Id, DateOnly Fecha, string? PiezaFdi, string Procedimiento, string Observaciones, string? Odontologo);
+public record RegistroClinicoDto(int Id, DateOnly Fecha, string? PiezaFdi, string Procedimiento, string Observaciones, string? Odontologo,
+    string Autor, DateTime CreadoEn, bool Anulado, string? MotivoAnulacion, string? AnuladoPor, DateTime? AnuladoEn);
+
+public record AnularRegistroRequest([Required(ErrorMessage = "Escribe el motivo de la anulación."), StringLength(300, MinimumLength = 5, ErrorMessage = "El motivo debe tener entre 5 y 300 caracteres.")] string Motivo);
+
+public record AuditoriaDto(long Id, DateTime Fecha, string Usuario, string Rol, string Accion, int PacienteId, string Paciente, string Detalle, string? Ip);
 
 public record PacienteDetalleDto(
     int Id, string Nombre, string Cedula, string Celular, string? Correo, string Antecedentes,
@@ -71,4 +78,17 @@ public record CrearRegistroRequest
 
 // ---------- Auth ----------
 public record LoginRequest([Required, EmailAddress] string Email, [Required] string Password);
-public record LoginResponse(string Token, DateTime ExpiraEn, string Nombre, string Rol);
+public record LoginResponse(string Token, DateTime ExpiraEn, string Nombre, string Rol, bool DebeCambiarPassword);
+public record CambiarPasswordRequest([Required] string Actual, [Required] string Nueva);
+
+// ---------- Usuarios ----------
+public record UsuarioDto(int Id, string Email, string Nombre, string Rol, bool Activo, bool DebeCambiarPassword,
+    int? OdontologoId, string? Odontologo, DateTime? UltimoIngresoEn);
+public record CrearUsuarioRequest(
+    [Required, EmailAddress(ErrorMessage = "El correo no es válido.")] string Email,
+    [Required(ErrorMessage = "El nombre es obligatorio."), StringLength(120, MinimumLength = 3)] string Nombre,
+    [Required] string Rol,
+    int? OdontologoId);
+/// <summary>La contraseña temporal solo se muestra una vez.</summary>
+public record UsuarioConPasswordDto(UsuarioDto Usuario, string PasswordTemporal);
+public record ActivoRequest(bool Activo);
