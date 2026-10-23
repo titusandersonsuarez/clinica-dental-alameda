@@ -27,6 +27,8 @@ public record CrearCitaRequest
     [EmailAddress(ErrorMessage = "El correo no es válido.")]
     public string? Correo { get; init; }
     [StringLength(500)] public string? Motivo { get; init; }
+    /// <summary>Autorización expresa para recibir avisos por WhatsApp.</summary>
+    public bool AceptaWhatsApp { get; init; }
 }
 
 public record CitaCreadaDto(int Id, DateOnly Fecha, string Hora, string Servicio, string Odontologo, string Estado);
@@ -37,7 +39,8 @@ public record CitaPacienteDto(int Id, DateOnly Fecha, string Hora, string Servic
 public record CitaAdminDto(
     int Id, DateOnly Fecha, string HoraInicio, string HoraFin, string Estado,
     int PacienteId, string PacienteNombre, string Cedula, string Celular,
-    int ServicioId, string Servicio, int OdontologoId, string Odontologo, string Motivo);
+    int ServicioId, string Servicio, int OdontologoId, string Odontologo, string Motivo,
+    bool AceptaWhatsApp, string? WhatsApp, string? WhatsAppError);
 
 public record CitasFiltro(string? Estado, int? OdontologoId, DateOnly? Desde, DateOnly? Hasta, string? Q);
 

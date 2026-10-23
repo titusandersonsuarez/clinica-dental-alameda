@@ -88,3 +88,19 @@ public class UsuarioConfig : IEntityTypeConfiguration<Usuario>
         e.Property(x => x.Rol).HasMaxLength(20);
     }
 }
+
+public class NotificacionConfig : IEntityTypeConfiguration<Notificacion>
+{
+    public void Configure(EntityTypeBuilder<Notificacion> e)
+    {
+        e.ToTable("notificaciones");
+        e.Property(x => x.Tipo).HasConversion<int>();
+        e.Property(x => x.Estado).HasConversion<int>();
+        e.Property(x => x.Telefono).HasMaxLength(16).IsRequired();
+        e.Property(x => x.UltimoError).HasMaxLength(500);
+        e.Property(x => x.IdProveedor).HasMaxLength(64);
+        e.HasOne(x => x.Cita).WithMany(c => c.Notificaciones).HasForeignKey(x => x.CitaId).OnDelete(DeleteBehavior.Cascade);
+        // El worker busca pendientes por fecha de próximo intento
+        e.HasIndex(x => new { x.Estado, x.ProximoIntentoEn });
+    }
+}

@@ -2,6 +2,7 @@ using System.Text;
 using DentalAlameda.Application.Abstractions;
 using DentalAlameda.Infrastructure.Persistence;
 using DentalAlameda.Infrastructure.Security;
+using DentalAlameda.Infrastructure.WhatsApp;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -37,6 +38,25 @@ public static class DependencyInjection
                 ValidateLifetime = true, ClockSkew = TimeSpan.FromMinutes(1)
             });
         services.AddAuthorization();
+
+        // WhatsApp: "Twilio" envía de verdad; "Consola" (por defecto) solo escribe en el log
+        services.Configure<ClinicaOptions>(config.GetSection("Clinica"));
+        services.Configure<TwilioOptions>(config.GetSection("Twilio"));
+        if (string.Equals(config["WhatsApp:Proveedor"], "Twilio", StringComparison.OrdinalIgnoreCase))
+        {
+            var tw = config.GetSection("Twilio").Get<TwilioOptions>() ?? new();
+            if (string.IsNullOrWhiteSpace(tw.AccountSid) || string.IsNullOrWhiteSpace(tw.AuthToken) || string.IsNullOrWhiteSpace(tw.From))
+                throw new InvalidOperationException("WhatsApp:Proveedor=Twilio requiere Twilio:AccountSid, Twilio:AuthToken y Twilio:From.");
+            services.AddHttpClient<INotificadorWhatsApp, TwilioWhatsAppNotificador>(c =>
+            {
+                c.BaseAddress = new Uri("https://api.twilio.com/");
+                c.Timeout = TimeSpan.FromSeconds(15);
+            });
+        }
+        else
+        {
+            services.AddScoped<INotificadorWhatsApp, ConsolaNotificador>();
+        }
         return services;
     }
 }

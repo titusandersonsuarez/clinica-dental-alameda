@@ -25,6 +25,14 @@ services:
       Seed__AdminEmail: ${ADMIN_EMAIL:-admin@dentalalameda.co}
       Seed__AdminPassword: ${ADMIN_PASSWORD:-Admin123*}
       Swagger__Enabled: "true"
+      Clinica__Nombre: ${CLINICA_NOMBRE:-Clínica Dental Alameda}
+      Clinica__Direccion: "${CLINICA_DIRECCION:-Calle 00 # 00-00, consultorio 201}"
+      WhatsApp__Proveedor: ${WHATSAPP_PROVEEDOR:-Consola}
+      Twilio__AccountSid: ${TWILIO_ACCOUNT_SID:-}
+      Twilio__AuthToken: ${TWILIO_AUTH_TOKEN:-}
+      Twilio__From: ${TWILIO_FROM:-+14155238886}
+      Twilio__PlantillaConfirmacion: ${TWILIO_PLANTILLA_CONFIRMACION:-}
+      Twilio__PlantillaCancelacion: ${TWILIO_PLANTILLA_CANCELACION:-}
     ports:
       - "5080:8080"
 

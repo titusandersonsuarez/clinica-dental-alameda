@@ -62,6 +62,10 @@ type Aviso = { texto: string; tipo: '' | 'ok' | 'err' } | null;
         <label class="f">Motivo de consulta
           <textarea id="r-motivo" name="motivo" [(ngModel)]="datos.motivo" placeholder="Ej.: sensibilidad en muela inferior derecha"></textarea>
         </label>
+        <label class="check">
+          <input id="r-wa" name="aceptaWhatsApp" type="checkbox" [(ngModel)]="datos.aceptaWhatsApp">
+          <span>Autorizo a la clínica a enviarme la confirmación y los cambios de mi cita por WhatsApp a este celular.</span>
+        </label>
       </div>
     </form>
 
@@ -117,7 +121,7 @@ export class ReservaComponent {
   aviso = signal<Aviso>(null);
   misCitas = signal<CitaPaciente[] | null>(null);
 
-  datos = { nombre: '', cedula: '', celular: '', correo: '', motivo: '' };
+  datos = { nombre: '', cedula: '', celular: '', correo: '', motivo: '', aceptaWhatsApp: false };
   consulta = { cedula: '', celular: '' };
 
   servicio = computed(() => this.servicios().find(s => s.id === this.servicioId()));
@@ -158,11 +162,11 @@ export class ReservaComponent {
     this.api.reservar({
       servicioId: this.servicioId()!, odontologoId: this.odontologoId()!, fecha: this.fecha(), hora: this.hora()!,
       nombre: d.nombre.trim(), cedula: d.cedula.trim(), celular: d.celular.trim(),
-      correo: d.correo.trim() || undefined, motivo: d.motivo.trim() || undefined
+      correo: d.correo.trim() || undefined, motivo: d.motivo.trim() || undefined, aceptaWhatsApp: d.aceptaWhatsApp
     }).subscribe({
       next: c => {
         this.enviando.set(false);
-        this.aviso.set({ texto: `Listo: ${fechaCorta(c.fecha)} a las ${c.hora} con ${c.odontologo}. Te confirmamos por WhatsApp.`, tipo: 'ok' });
+        this.aviso.set({ texto: `Listo: ${fechaCorta(c.fecha)} a las ${c.hora} con ${c.odontologo}. ` + (d.aceptaWhatsApp ? 'Te avisamos por WhatsApp cuando la confirmemos.' : 'Consulta el estado aquí con tu cédula y celular.'), tipo: 'ok' });
         this.datos.motivo = '';
         this.consulta = { cedula: d.cedula, celular: d.celular };
         this.cargarHorarios(this.odontologoId()!, this.servicioId()!, this.fecha());

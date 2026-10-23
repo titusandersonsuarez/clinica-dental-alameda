@@ -7,7 +7,7 @@ export interface Disponibilidad { fecha: string; odontologoId: number; servicioI
 
 export interface CrearCita {
   servicioId: number; odontologoId: number; fecha: string; hora: string;
-  nombre: string; cedula: string; celular: string; correo?: string; motivo?: string;
+  nombre: string; cedula: string; celular: string; correo?: string; motivo?: string; aceptaWhatsApp: boolean;
 }
 export interface CitaCreada { id: number; fecha: string; hora: string; servicio: string; odontologo: string; estado: EstadoCita; }
 export interface CitaPaciente { id: number; fecha: string; hora: string; servicio: string; odontologo: string; estado: EstadoCita; }
@@ -16,6 +16,7 @@ export interface CitaAdmin {
   id: number; fecha: string; horaInicio: string; horaFin: string; estado: EstadoCita;
   pacienteId: number; pacienteNombre: string; cedula: string; celular: string;
   servicioId: number; servicio: string; odontologoId: number; odontologo: string; motivo: string;
+  aceptaWhatsApp: boolean; whatsApp: 'Pendiente' | 'Enviada' | 'Fallida' | null; whatsAppError: string | null;
 }
 export interface Resumen { citasHoy: number; pendientes: number; confirmadas: number; pacientes: number; }
 

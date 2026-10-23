@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using DentalAlameda.Api.Middleware;
+using DentalAlameda.Api.Workers;
 using DentalAlameda.Application;
 using DentalAlameda.Application.Abstractions;
 using DentalAlameda.Infrastructure;
@@ -46,6 +47,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddHealthChecks();
+builder.Services.AddHostedService<NotificacionesWorker>();
 
 var app = builder.Build();
 

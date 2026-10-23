@@ -78,6 +78,57 @@ namespace DentalAlameda.Infrastructure.Persistence.Migrations
                     b.ToTable("citas", (string)null);
                 });
 
+            modelBuilder.Entity("DentalAlameda.Domain.Entities.Notificacion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CitaId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreadaEn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("EnviadaEn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("IdProveedor")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("Intentos")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ProximoIntentoEn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Telefono")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UltimoError")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CitaId");
+
+                    b.HasIndex("Estado", "ProximoIntentoEn");
+
+                    b.ToTable("notificaciones", (string)null);
+                });
+
             modelBuilder.Entity("DentalAlameda.Domain.Entities.Odontologo", b =>
                 {
                     b.Property<int>("Id")
@@ -116,6 +167,9 @@ namespace DentalAlameda.Infrastructure.Persistence.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("AceptaWhatsApp")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Antecedentes")
                         .IsRequired()
@@ -298,6 +352,17 @@ namespace DentalAlameda.Infrastructure.Persistence.Migrations
                     b.Navigation("Servicio");
                 });
 
+            modelBuilder.Entity("DentalAlameda.Domain.Entities.Notificacion", b =>
+                {
+                    b.HasOne("DentalAlameda.Domain.Entities.Cita", "Cita")
+                        .WithMany("Notificaciones")
+                        .HasForeignKey("CitaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cita");
+                });
+
             modelBuilder.Entity("DentalAlameda.Domain.Entities.RegistroClinico", b =>
                 {
                     b.HasOne("DentalAlameda.Domain.Entities.Odontologo", "Odontologo")
@@ -312,6 +377,11 @@ namespace DentalAlameda.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Odontologo");
+                });
+
+            modelBuilder.Entity("DentalAlameda.Domain.Entities.Cita", b =>
+                {
+                    b.Navigation("Notificaciones");
                 });
 
             modelBuilder.Entity("DentalAlameda.Domain.Entities.Paciente", b =>

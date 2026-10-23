@@ -63,7 +63,7 @@ public class AgendaService(IAppDbContext db, IClock clock)
             var paciente = await db.Pacientes.FirstOrDefaultAsync(p => p.Cedula == req.Cedula, ct);
             if (paciente is null)
             {
-                paciente = new Paciente { Cedula = req.Cedula, Nombre = req.Nombre.Trim(), Celular = celular, Correo = req.Correo?.Trim() };
+                paciente = new Paciente { Cedula = req.Cedula, Nombre = req.Nombre.Trim(), Celular = celular, Correo = req.Correo?.Trim(), AceptaWhatsApp = req.AceptaWhatsApp };
                 db.Pacientes.Add(paciente);
             }
             else
@@ -75,6 +75,7 @@ public class AgendaService(IAppDbContext db, IClock clock)
                 if (pacienteTieneCitaCruzada)
                     throw new DomainException("Ya tienes una cita a esa hora.");
                 paciente.ActualizarContacto(req.Nombre, celular, req.Correo);
+                paciente.AceptaWhatsApp = req.AceptaWhatsApp;
             }
 
             var cita = new Cita

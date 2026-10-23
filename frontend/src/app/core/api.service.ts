@@ -32,6 +32,7 @@ export class ApiService {
   }
   resumen() { return this.http.get<Resumen>(`${this.base}/admin/citas/resumen`); }
   cambiarEstado(id: number, estado: EstadoCita) { return this.http.patch<void>(`${this.base}/admin/citas/${id}/estado`, { estado }); }
+  reenviarWhatsApp(id: number) { return this.http.post<void>(`${this.base}/admin/citas/${id}/whatsapp`, {}); }
   pacientes(q = '') { return this.http.get<PacienteLista[]>(`${this.base}/admin/pacientes`, { params: q ? { q } : {} }); }
   paciente(id: number) { return this.http.get<PacienteDetalle>(`${this.base}/admin/pacientes/${id}`); }
   guardarAntecedentes(id: number, antecedentes: string) {

@@ -24,6 +24,14 @@ public class CitasAdminController(CitasAdminService citas) : ControllerBase
         await citas.CambiarEstadoAsync(id, req.Estado, ct);
         return NoContent();
     }
+
+    /// <summary>Vuelve a encolar el WhatsApp del estado actual (confirmación o cancelación).</summary>
+    [HttpPost("{id:int}/whatsapp")]
+    public async Task<IActionResult> ReenviarWhatsApp(int id, CancellationToken ct)
+    {
+        await citas.ReenviarWhatsAppAsync(id, ct);
+        return Accepted();
+    }
 }
 
 [ApiController]

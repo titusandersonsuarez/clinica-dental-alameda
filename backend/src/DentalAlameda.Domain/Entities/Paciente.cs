@@ -10,6 +10,8 @@ public class Paciente
     public string Celular { get; set; } = "";
     public string? Correo { get; set; }
     public string Antecedentes { get; set; } = "";
+    /// <summary>Autorización expresa para recibir avisos de citas por WhatsApp (Ley 1581 de 2012).</summary>
+    public bool AceptaWhatsApp { get; set; }
     public DateTime CreadoEn { get; set; } = DateTime.UtcNow;
 
     public List<Cita> Citas { get; set; } = [];

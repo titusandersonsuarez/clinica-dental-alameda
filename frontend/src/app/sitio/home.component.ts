@@ -70,7 +70,7 @@ import { ReservaComponent } from './reserva.component';
     <div class="wrap">
       <div class="sec-head">
         <div><div class="eyebrow">Citas en línea</div><h2>Reserva tu cita</h2></div>
-        <p class="muted">Los horarios tachados ya están ocupados. Recibes la confirmación por WhatsApp.</p>
+        <p class="muted">Los horarios tachados ya están ocupados. Si lo autorizas, te avisamos por WhatsApp cuando confirmemos tu cita.</p>
       </div>
       <app-reserva [servicios]="servicios()" [odontologos]="odontologos()" />
     </div>

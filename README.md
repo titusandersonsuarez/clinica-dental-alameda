@@ -4,6 +4,8 @@ Sistema web para una clínica odontológica: sitio público con reserva de citas
 
 ![Portada](docs/capturas/home.png)
 
+![Panel con estado del WhatsApp](docs/capturas/admin-wa.png)
+
 ## Stack
 
 | Capa | Tecnología |
@@ -12,7 +14,8 @@ Sistema web para una clínica odontológica: sitio público con reserva de citas
 | Persistencia | PostgreSQL 16 + Entity Framework Core 8 (Npgsql), migraciones |
 | Seguridad | JWT Bearer, contraseñas con BCrypt, rate limiting en reservas y login |
 | Frontend | Angular 19 (standalone components, signals, lazy loading, interceptor y guard funcionales) |
-| Pruebas | xUnit (dominio + servicio de agenda con EF InMemory) — 18 pruebas |
+| Notificaciones | WhatsApp vía Twilio con cola outbox, worker en segundo plano y reintentos |
+| Pruebas | xUnit (dominio, agenda, cola de WhatsApp y cliente Twilio con HTTP simulado) — 32 pruebas |
 | Despliegue | Docker Compose: `db` + `api` + `web` (nginx con proxy a `/api`) |
 
 ## Funcionalidades
@@ -21,12 +24,14 @@ Sistema web para una clínica odontológica: sitio público con reserva de citas
 - Servicios con duración y precio de referencia (COP), equipo y horario.
 - Reserva en 5 pasos: servicio → odontólogo → fecha → hora → datos. Los horarios ocupados aparecen tachados.
 - Consulta de citas propias con cédula + celular.
+- Casilla de autorización para recibir avisos por WhatsApp (Ley 1581).
 - Botón flotante de WhatsApp.
 
 **Panel de administración** (`/admin`, requiere login)
 - Indicadores: citas de hoy, por confirmar, confirmadas y total de pacientes.
 - Citas con filtros por estado, odontólogo, fecha y búsqueda por nombre o cédula.
 - Flujo de estados: `Pendiente → Confirmada → Atendida`, y cancelación desde Pendiente o Confirmada.
+- **WhatsApp automático** al confirmar o cancelar: la tabla muestra si el aviso está en cola, enviado o falló (con el motivo y botón para reenviar). Ver [docs/WHATSAPP.md](docs/WHATSAPP.md).
 - Historia clínica: antecedentes y alergias, procedimientos por pieza dental en notación FDI (11–48), odontograma que resalta las piezas tratadas.
 
 ## Reglas de negocio importantes
@@ -85,6 +90,7 @@ npx ng serve                    # http://localhost:4200
 | PATCH | `/api/admin/citas/{id}/estado` | JWT |
 | GET | `/api/admin/pacientes?q` · `/api/admin/pacientes/{id}` | JWT |
 | PUT | `/api/admin/pacientes/{id}/antecedentes` | JWT |
+| POST | `/api/admin/citas/{id}/whatsapp` (reenviar aviso) | JWT |
 | POST | `/api/admin/pacientes/{id}/historia` | JWT |
 
 Los errores se devuelven como `ProblemDetails` con mensajes en español (404 no existe, 409 regla de negocio, 400 validación).
@@ -110,4 +116,5 @@ frontend/src/app/
 - Cambia `JWT_KEY`, `ADMIN_PASSWORD` y `DB_PASSWORD`; pon HTTPS delante (Caddy, Traefik o el proxy del hosting).
 - Reemplaza los datos de contacto en `frontend/src/app/core/clinica.config.ts` y los odontólogos del seed.
 - La historia clínica es información sensible (Ley 1581 de 2012 y Resolución 1995 de 1999 en Colombia): define política de tratamiento de datos, respaldos y registro de auditoría.
-- Siguientes pasos sugeridos: notificación automática por WhatsApp/correo al confirmar, festivos colombianos, bloqueos de agenda por odontólogo y roles (recepción vs. odontólogo).
+- Para WhatsApp real: crea las plantillas en Twilio y configura `WHATSAPP_PROVEEDOR=Twilio` (pasos en [docs/WHATSAPP.md](docs/WHATSAPP.md)).
+- Siguientes pasos sugeridos: recordatorio automático 24 h antes de la cita, festivos colombianos, bloqueos de agenda por odontólogo y roles (recepción vs. odontólogo).

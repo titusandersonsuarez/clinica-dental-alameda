@@ -186,3 +186,11 @@ nav.tabs a.primary,nav.tabs a.on{background:var(--accent);color:var(--accent-ink
 @media (max-width:860px){.summary{position:static}}
 @media (max-width:560px){nav.tabs a{padding:.35rem .6rem;font-size:.82rem}}
 .mine-item .pill{align-self:flex-start}
+.check{display:flex;gap:.6rem;align-items:flex-start;font-size:.88rem;color:var(--muted);cursor:pointer}
+.check input{margin-top:.2rem;accent-color:var(--accent);width:16px;height:16px;flex:none}
+.wa-state{font-size:.75rem;margin-top:.35rem;display:flex;align-items:center;gap:.35rem;color:var(--muted);white-space:nowrap}
+.wa-state::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--line)}
+.wa-state.wa-enviada{color:var(--ok)}.wa-state.wa-enviada::before{background:var(--ok)}
+.wa-state.wa-pendiente{color:var(--warn)}.wa-state.wa-pendiente::before{background:var(--warn)}
+.wa-state.wa-fallida{color:var(--bad)}.wa-state.wa-fallida::before{background:var(--bad)}
+.wa-err{font-size:.72rem;color:var(--bad);max-width:22ch;margin-top:.15rem}

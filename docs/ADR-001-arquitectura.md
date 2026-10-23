@@ -63,6 +63,6 @@ Monolito modular en ASP.NET Core 8 con Clean Architecture (Domain, Application, 
 
 1. [x] Dominio, casos de uso, API y migración inicial.
 2. [x] Frontend Angular: sitio, reserva, panel y odontograma.
-3. [ ] Notificación por WhatsApp al confirmar (Twilio o Meta Cloud API).
+3. [x] Notificación por WhatsApp al confirmar y cancelar (Twilio, patrón outbox). Ver WHATSAPP.md.
 4. [ ] Calendario de festivos y bloqueos por odontólogo.
 5. [ ] Registro de auditoría de lecturas y cambios en historia clínica.

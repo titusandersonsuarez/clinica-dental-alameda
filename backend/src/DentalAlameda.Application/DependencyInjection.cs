@@ -10,5 +10,6 @@ public static class DependencyInjection
         .AddScoped<AgendaService>()
         .AddScoped<CitasAdminService>()
         .AddScoped<PacientesService>()
-        .AddScoped<AuthService>();
+        .AddScoped<AuthService>()
+        .AddScoped<NotificacionesService>();
 }
