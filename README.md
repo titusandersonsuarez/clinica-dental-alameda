@@ -6,6 +6,8 @@ Sistema web para una clínica odontológica: sitio público con reserva de citas
 
 ![Panel con estado del WhatsApp](docs/capturas/admin-wa.png)
 
+**Video demo (54 s):** [docs/video/clinica_dental_demo.mp4](docs/video/clinica_dental_demo.mp4) · reserva → confirmación con WhatsApp → historia clínica.
+
 ## Stack
 
 | Capa | Tecnología |
